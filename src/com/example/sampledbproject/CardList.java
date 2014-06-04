@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -28,8 +30,6 @@ public class CardList extends Activity {
 		else {
 			Log.d("EVRIM", "context is null");
 		}
-
-		//connect_db = new ConnectDB(getApplicationContext());
 		
 		ListView list_view = (ListView) findViewById(R.id.list_view);
 		
@@ -43,6 +43,18 @@ public class CardList extends Activity {
  
         // 2. setListAdapter
         list_view.setAdapter(adapter);
+        
+        list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				
+				setToastMsg("Click ListItem Number " + position + "ID = " + id );
+			}
+        	}); 
 	}
 	
 	private void setToastMsg(String text) {

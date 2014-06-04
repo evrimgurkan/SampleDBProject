@@ -9,22 +9,21 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.widget.Toast;
 
 public class ConnectDB extends SQLiteOpenHelper{
 
-	// Logcat tag
+	// LogCat tag
     private static final String LOG = "NFC_CARDS";
     
 	private static final String DB_NAME = "CARDS";
 	private static final int version = 1;
-	private static final String TABLE_ACCOUNT = "AccountTable";
-	private static final String KEY_ID = "AccountID";
+	public static final String TABLE_ACCOUNT = "CardTable";
+	private static final String KEY_ID = "id";
 	private static final String KEY_NAME = "AccountName";
 	private static final String KEY_NUMBER = "AccountNumber";
 	
 	private static String sql_create_account_table = "CREATE TABLE " + TABLE_ACCOUNT +
-			"(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_NAME + " TEXT, " + KEY_NUMBER + " TEXT);";
+			"(" + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_NAME + " TEXT, " + KEY_NUMBER + " TEXT" + ");";
 	
 	public ConnectDB(Context context) {
 		super(context, DB_NAME, null, version);
@@ -38,9 +37,14 @@ public class ConnectDB extends SQLiteOpenHelper{
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL("DROP TABLE IF EXIST " + TABLE_ACCOUNT);
-		
+		Log.e(LOG, "onUpgrade");
 		// create new table
 		onCreate(db);
+	}
+	
+	public void createTable() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		db.execSQL(sql_create_account_table);
 	}
 	
 	// closing database
@@ -48,6 +52,13 @@ public class ConnectDB extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getReadableDatabase();
         if (db != null && db.isOpen())
             db.close();
+    }
+    
+    public void deleteDB() {
+    	Log.d(LOG, "deleteDB");
+    	SQLiteDatabase db = this.getWritableDatabase();
+    	db.delete(TABLE_ACCOUNT, null, null);
+    	//db.execSQL("DROP TABLE IF EXIST " + TABLE_ACCOUNT);
     }
 	
 	// ------------------------ Account table methods ----------------//
@@ -58,6 +69,7 @@ public class ConnectDB extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
  
         ContentValues values = new ContentValues();
+        
         values.put(KEY_NAME, card.getCardName());
         values.put(KEY_NUMBER, card.getCardAccount());
         System.out.println(card.getCardName());
@@ -73,21 +85,22 @@ public class ConnectDB extends SQLiteOpenHelper{
     public Cards getCardInfo(long card_id) {
         SQLiteDatabase db = this.getReadableDatabase();
         
-        String selectQuery = "SELECT * FROM " + TABLE_ACCOUNT;
-// 
-//        //Log.e(LOG, selectQuery);
+        String selectQuery = "SELECT * FROM " + TABLE_ACCOUNT 
+        		+ " WHERE " + KEY_ID + " = " + card_id;
+ 
+        Log.e(LOG, selectQuery);
  
         Cursor c = db.rawQuery(selectQuery, null);
  
-        if (c != null)
-            c.moveToFirst();
- 
-        Cards card = new Cards();
-        //card.setCardId(c.getInt((c.getColumnIndex(KEY_ID))));
-        card.setCardName((c.getString(c.getColumnIndex(KEY_NAME))));
-        card.setCardAccount(c.getString(c.getColumnIndex(KEY_NUMBER)));
-
-        return card;
+        if (c != null && c.moveToFirst()){
+        	Cards card = new Cards();
+            card.setCardId(c.getInt((c.getColumnIndex(KEY_ID))));
+            card.setCardName((c.getString(c.getColumnIndex(KEY_NAME))));
+            card.setCardAccount(c.getString(c.getColumnIndex(KEY_NUMBER)));
+            return card;
+        }
+        
+        return null;
     }
     
     
@@ -107,6 +120,7 @@ public class ConnectDB extends SQLiteOpenHelper{
         if (c.moveToFirst()) {
             do {
                 Cards crd = new Cards();
+                crd.setCardId(c.getInt((c.getColumnIndex(KEY_ID))));
                 crd.setCardName((c.getString(c.getColumnIndex(KEY_NAME))));
                 crd.setCardAccount(c.getString(c.getColumnIndex(KEY_NUMBER)));
      
