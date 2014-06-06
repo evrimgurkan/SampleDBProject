@@ -45,14 +45,12 @@ public class CardList extends Activity {
         list_view.setAdapter(adapter);
         
         list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				// TODO Auto-generated method stub
-				
-				setToastMsg("Click ListItem Number " + position + "ID = " + id );
+				// try this !
+				Cards card = (Cards) parent.getItemAtPosition(position);
+				setToastMsg("Click ListItem Number " + position + " ID = " + id + " Card Name = " + card.getCardName());
 			}
         	}); 
 	}
